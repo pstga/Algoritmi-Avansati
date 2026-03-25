@@ -1,4 +1,4 @@
-from chromosome import Chromosome as chr, Chromosome
+from chromosome import Chromosome as chr
 import random as rnd
 
 # -------------------------------------------------------------------
@@ -47,17 +47,18 @@ def populate(config : dict) -> list[chr.Chromosome]:
     # hello world
     return population
 
+# fitness ul total al cromozomilor
 def get_population_fitness(pop : list[chr.Chromosome]) -> float:
-    total_fitness : float = 0
+    total_fitness = 0.0
     for chromosome in pop:
         total_fitness += chromosome.fitness
     return total_fitness
 
 # -------------------------------------------------------------------
-# functiile de laborator :)
+# functiile din laborator :)
 
-# selectia urmatoarelor victime
-def generator(population: list[chr], data : dict) -> Chromosome:
+# alegem urmatoarele victime
+def generator(population: list[chr], data : dict) -> chr:
     fitness = [chrom.fitness for chrom in population]
 
     if data['maximize'] is True:
@@ -79,10 +80,33 @@ def generator(population: list[chr], data : dict) -> Chromosome:
             return chromosome
     return population[-1]
 
-def selection():
-    return 1
+def selection(config: dict, population: list[chr]) -> list[chr]:
 
-def mutation():
+    new_population: list[chr] = []
+
+    for i in range(config["population_size"]):
+        selected_chromosome = generator(population, config)
+        new_population.append(selected_chromosome)
+
+    return new_population
+
+def mutation(config : dict, population : list[chr]) -> list[chr]:
+    new_population : list[chr] = population.copy()
+
+    for i in range(len(new_population)):
+        u : float = rnd.uniform(0, 1)
+        if u < config["mutation_probability"]:
+            bit : int = rnd.randint(0, rnd.Chromosome.binary_length - 1)
+            binary : str = new_population[i].binary
+            new_bit : int = 1 - int(binary[bit])
+            new_binary : str = binary[:bit] + str(new_bit) + binary[(bit+1):]
+            new_decimal : float = chr.get_decimal(new_binary, config)
+            new_fitness : float = chr.get_fitness(new_decimal, config)
+            new_population[i] = chr.Chromosome(new_binary, new_decimal, new_fitness)
+
+    return new_population
+
+def get_crossover_list(config : dict, population : list[chr]) -> list[int]:
     return 1
 
 def crossover():
