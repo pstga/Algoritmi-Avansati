@@ -31,8 +31,8 @@ def get_binary(value: int) -> str:
 # bin(x) -> (b - a) / (2^l - 1) * dec(x) + a
 def get_decimal(binary: str, config: dict) -> float:
     return round(
-        int(binary, 2) * (config["domain_end"] - config["domain_start"]) / (2 ** Chromosome.binary_length - 1) +
-        config["domain_start"], config["precision"])
+        int(binary, 2) * (config["end"] - config["start"]) / (2 ** Chromosome.binary_length - 1) +
+        config["start"], config["precision"])
 
 # aplicam functia
 def get_fitness(decimal: float, config: dict) -> float:
