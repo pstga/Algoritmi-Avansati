@@ -2,8 +2,8 @@ from chromosome import Chromosome
 import chromosome
 
 def print_init(population: list[Chromosome]):
-    for chromosome in population:
-        print(f"{population.index(chromosome)+1}: {chromosome.binary}; x = {chromosome.decimal}; f(x) = {chromosome.fitness}")
+    for i, chromosome in enumerate(population):
+        print(f"{i+1}: {chromosome.binary}; x = {chromosome.decimal}; f(x) = {chromosome.fitness}")
     print()
     return 0
 

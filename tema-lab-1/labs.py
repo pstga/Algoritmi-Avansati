@@ -45,7 +45,7 @@ def populate(config : dict) -> list[chr]:
     return population
 
 # fitness ul total al cromozomilor
-def get_population_fitness(population : list[chr]) -> float:
+def get_total_fitness(population : list[chr]) -> float:
     total_fitness = 0.0
     for chromosome in population:
         total_fitness += chromosome.fitness
@@ -113,6 +113,7 @@ def crossover(population: list[chr], config: dict, gen_count : int) -> list[chr]
             participants_indices.pop()
 
         if gen_count == 1:
+            print(f"Probabilitatea de crossover: {crossover_prob}")
             for i, chromo in enumerate(participants_indices):
                 print(f"Alegem cromozomul {i+1}")
 
@@ -147,3 +148,50 @@ def crossover(population: list[chr], config: dict, gen_count : int) -> list[chr]
             population[idx1] = make_chromosome(child1)
             population[idx2] = make_chromosome(child2)
     return population
+
+# operatia de mutatie, unde se inverseaza bitul de la o pozitie random
+def mutation(population: list[chr], config: dict, gen_count: int) -> list[chr]:
+    mutation_prob = config['mutation_probability']
+    binary_len = chr.binary_length
+    
+    if gen_count == 1:
+        print(f"\nProbabilitatea de mutatie: {mutation_prob}")
+    
+    mutated_indices = []
+    
+    def make_chromosome(bin_str: str) -> chr:
+        decimal_val = chromosome.get_decimal(bin_str, config)
+        fit_val = chromosome.get_fitness(decimal_val, config)
+        return chr(bin_str, decimal_val, fit_val)
+
+    for i, chrom in enumerate(population):
+        u = rnd.random()
+        if u < mutation_prob:
+            mutated_indices.append(i)
+            pos = rnd.randint(0, binary_len - 1)
+            
+            bin_list = list(chrom.binary)
+            bin_list[pos] = '1' if bin_list[pos] == '0' else '0'
+            new_binary = "".join(bin_list)
+            
+            population[i] = make_chromosome(new_binary)
+            
+    if gen_count == 1:
+        print("Au fost modificati cromozomii:")
+        for idx in mutated_indices:
+            print(idx + 1)
+            
+    return population
+
+# -------------------------------------------------------------------
+# partea a doua de cod: get_max_fitness si get_mean_fitness
+
+def get_max_fitness(population: list[chr]) -> float:
+    max = 0
+    for chromo in population:
+        if chromo.fitness > max:
+            max = chromo.fitness
+    return max
+
+def get_mean_fitness(population: list[chr]) -> float:
+    return (get_total_fitness(population)/len(population))
