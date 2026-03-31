@@ -21,7 +21,11 @@ if __name__ == '__main__':
 
             # selectie
             new_population: list[chr] = []
-            for i in range(data["generations"]):
+            
+            # selectie elitista 
+            best_chromosome = max(population, key=lambda c: c.fitness)
+            new_population.append(best_chromosome)
+            for i in range(1, data["generations"]):
                 selected_chromosome, u = labs.select_chromosome(population, probabilities)
                 new_population.append(selected_chromosome)
                 output.print_selected(selected_chromosome, u, new_population)
@@ -49,7 +53,12 @@ if __name__ == '__main__':
 
             # selectie
             new_population: list[chr] = []
-            for i in range(data["generations"]):
+            
+            # elitism
+            best_chromosome = max(population, key=lambda c: c.fitness)
+            new_population.append(best_chromosome)
+            
+            for i in range(1, data["generations"]):
                 selected_chromosome, u = labs.select_chromosome(population, probabilities)
                 new_population.append(selected_chromosome)
 
