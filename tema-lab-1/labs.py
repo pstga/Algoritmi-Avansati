@@ -1,7 +1,6 @@
 from chromosome import Chromosome as chr
 import chromosome
 import random as rnd
-import bisect
 import output
 
 # -------------------------------------------------------------------
@@ -101,53 +100,53 @@ def select_chromosome(population: list[chr], probabilities: list[float]) -> chr:
 def crossover(population: list[chr], config: dict, gen_count : int) -> list[chr]:
     crossover_prob = config['crossover_probability']
     participants_indices = []
-    
+
+    # alegem victimele (once again)
+    for i, chrom in enumerate(population):
+        u = rnd.random()
+        if u < crossover_prob:
+            participants_indices.append(i)
+        
+    if len(participants_indices) % 2 != 0:
+        participants_indices.pop()
+
     if gen_count == 1:
-        # alegem victimele (once again)
-        for i, chrom in enumerate(population):
-            u = rnd.random()
-            if u < crossover_prob:
-                participants_indices.append(i)
-            
-        if len(participants_indices) % 2 != 0:
-            participants_indices.pop()
+        with open(output.filename, "a") as f:
+            f.write(f"Probabilitatea de crossover: {crossover_prob}\n")
+            for chromo in participants_indices:
+                f.write(f"Alegem cromozomul {chromo+1}\n")
+
+    binary_len = chr.binary_length  # luam lungimea
+
+    # imi fac eu cromozomul cu fitness si ce mai era da
+    def make_chromosome(bin_str: str) -> chr:
+        decimal_val = chromosome.get_decimal(bin_str, config)
+        fit_val = chromosome.get_fitness(decimal_val, config)
+        return chr(bin_str, decimal_val, fit_val)
+
+    # aici se intampla crossover ul real
+    for i in range(0, len(participants_indices), 2):
+        idx1 = participants_indices[i]
+        idx2 = participants_indices[i+1]
+    
+        parent1 = population[idx1]
+        parent2 = population[idx2]
+    
+        # alegem cut point ul - tot random
+        cut_point = rnd.randint(1, binary_len - 1)
+
+        child1 = parent1.binary[:cut_point] + parent2.binary[cut_point:]
+        child2 = parent2.binary[:cut_point] + parent1.binary[cut_point:]
 
         if gen_count == 1:
-            print(f"Probabilitatea de crossover: {crossover_prob}")
-            for i, chromo in enumerate(participants_indices):
-                print(f"Alegem cromozomul {i+1}")
-
-        
-        binary_len = chr.binary_length  # luam lungimea
+            with open(output.filename, "a") as f:
+                f.write(f"Facem crossover intre cromozomii {idx1+1} si {idx2+1} la punctul {cut_point}\n")
+                f.write(f"Avem rezultatele: {child1} si {child2}\n\n")
     
-        # imi fac eu cromozomul cu fitness si ce mai era da
-        def make_chromosome(bin_str: str) -> chr:
-            decimal_val = chromosome.get_decimal(bin_str, config)
-            fit_val = chromosome.get_fitness(decimal_val, config)
-            return chr(bin_str, decimal_val, fit_val)
-
-        # aici se intampla crossover ul real
-        for i in range(0, len(participants_indices), 2):
-            idx1 = participants_indices[i]
-            idx2 = participants_indices[i+1]
-        
-            parent1 = population[idx1]
-            parent2 = population[idx2]
-        
-            # alegem cut point ul - tot random
-            cut_point = rnd.randint(1, binary_len - 1)
-
-            child1 = parent1.binary[:cut_point] + parent2.binary[cut_point:]
-            child2 = parent2.binary[:cut_point] + parent1.binary[cut_point:]
-
-            if gen_count == 1:
-                print(f"Facem crossover intre cromozomii {idx1} si {idx2} la punctul {cut_point}")
-                print(f"Avem rezultatele: {child1} si {child2}")
-                print()
-        
-            population[idx1] = make_chromosome(child1)
-            population[idx2] = make_chromosome(child2)
+        population[idx1] = make_chromosome(child1)
+        population[idx2] = make_chromosome(child2)
     return population
+
 
 # operatia de mutatie, unde se inverseaza bitul de la o pozitie random
 def mutation(population: list[chr], config: dict, gen_count: int) -> list[chr]:
@@ -155,7 +154,8 @@ def mutation(population: list[chr], config: dict, gen_count: int) -> list[chr]:
     binary_len = chr.binary_length
     
     if gen_count == 1:
-        print(f"\nProbabilitatea de mutatie: {mutation_prob}")
+        with open(output.filename, "a") as f:
+            f.write(f"\nProbabilitatea de mutatie: {mutation_prob}\n")
     
     mutated_indices = []
     
@@ -177,9 +177,10 @@ def mutation(population: list[chr], config: dict, gen_count: int) -> list[chr]:
             population[i] = make_chromosome(new_binary)
             
     if gen_count == 1:
-        print("Au fost modificati cromozomii:")
-        for idx in mutated_indices:
-            print(idx + 1)
+        with open(output.filename, "a") as f:
+            f.write("Au fost modificati cromozomii:\n")
+            for idx in mutated_indices:
+                f.write(f"{idx + 1}\n")
             
     return population
 
