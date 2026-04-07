@@ -34,6 +34,6 @@ def get_decimal(binary: str, config: dict) -> float:
         int(binary, 2) * (config["end"] - config["start"]) / (2 ** Chromosome.binary_length - 1) +
         config["start"], config["precision"])
 
-# aplicam functia
+# aplicam functia pt a afla fitnessul
 def get_fitness(decimal: float, config: dict) -> float:
     return config["a"] * decimal * decimal + config["b"] * decimal + config["c"]
