@@ -1,3 +1,4 @@
+# labs : functiile implementate in laborator + overall logica evolutiei generatiilor de cromozomi
 from chromosome import Chromosome as chr
 import chromosome
 import random as rnd
@@ -64,7 +65,7 @@ def get_probabilities(population: list[chr], total_fitness: float) -> list[float
 # -------------------------------------------------------------------
 # functiile din laborator :)
 
-# random roulette generator + bin search pt noua noastra victima :3
+# random roulette generator + bin search pt noua noastra victima :D
 def select_chromosome(population: list[chr], probabilities: list[float]) -> chr:
         
     # probabilitatile cumulate
@@ -96,6 +97,12 @@ def select_chromosome(population: list[chr], probabilities: list[float]) -> chr:
             
     return population[index], u
 
+# imi fac eu cromozomul cu fitness si ce mai era da: va fi folosita si rescrisa la partea urmatoare so e mai usor sa apelam fct
+def make_chromosome(bin_str: str, config: dict) -> chr:
+    decimal_val = chromosome.get_decimal(bin_str, config)
+    fit_val = chromosome.get_fitness(decimal_val, config)
+    return chr(bin_str, decimal_val, fit_val)
+
 # operatia de crossover cu tot cu alegerea 
 def crossover(population: list[chr], config: dict, gen_count : int) -> list[chr]:
     crossover_prob = config['crossover_probability']
@@ -106,10 +113,12 @@ def crossover(population: list[chr], config: dict, gen_count : int) -> list[chr]
         u = rnd.random()
         if u < crossover_prob:
             participants_indices.append(i)
-        
+
+    # nu stiam sa handle uiesc daca am numar impar, dar o sa presupun ca nu mai face crossover
     if len(participants_indices) % 2 != 0:
         participants_indices.pop()
 
+    # la primul pas printez tot
     if gen_count == 1:
         with open(output.filename, "a") as f:
             f.write(f"Probabilitatea de crossover: {crossover_prob}\n")
@@ -117,12 +126,6 @@ def crossover(population: list[chr], config: dict, gen_count : int) -> list[chr]
                 f.write(f"Alegem cromozomul {chromo+1}\n")
 
     binary_len = chr.binary_length  # luam lungimea
-
-    # imi fac eu cromozomul cu fitness si ce mai era da
-    def make_chromosome(bin_str: str) -> chr:
-        decimal_val = chromosome.get_decimal(bin_str, config)
-        fit_val = chromosome.get_fitness(decimal_val, config)
-        return chr(bin_str, decimal_val, fit_val)
 
     # aici se intampla crossover ul real
     for i in range(0, len(participants_indices), 2):
@@ -143,13 +146,14 @@ def crossover(population: list[chr], config: dict, gen_count : int) -> list[chr]
                 f.write(f"Facem crossover intre cromozomii {idx1+1} si {idx2+1} la punctul {cut_point}\n")
                 f.write(f"Avem rezultatele: {child1} si {child2}\n\n")
     
-        population[idx1] = make_chromosome(child1)
-        population[idx2] = make_chromosome(child2)
+        population[idx1] = make_chromosome(child1, config)
+        population[idx2] = make_chromosome(child2, config)
     return population
 
 
 # operatia de mutatie, unde se inverseaza bitul de la o pozitie random
 def mutation(population: list[chr], config: dict, gen_count: int) -> list[chr]:
+    # aceeasi logica: prob < => e ales
     mutation_prob = config['mutation_probability']
     binary_len = chr.binary_length
     
@@ -158,23 +162,19 @@ def mutation(population: list[chr], config: dict, gen_count: int) -> list[chr]:
             f.write(f"\nProbabilitatea de mutatie: {mutation_prob}\n")
     
     mutated_indices = []
-    
-    def make_chromosome(bin_str: str) -> chr:
-        decimal_val = chromosome.get_decimal(bin_str, config)
-        fit_val = chromosome.get_fitness(decimal_val, config)
-        return chr(bin_str, decimal_val, fit_val)
 
     for i, chrom in enumerate(population):
         u = rnd.random()
         if u < mutation_prob:
             mutated_indices.append(i)
+            # de unde se "rupe"
             pos = rnd.randint(0, binary_len - 1)
             
             bin_list = list(chrom.binary)
             bin_list[pos] = '1' if bin_list[pos] == '0' else '0'
             new_binary = "".join(bin_list)
             
-            population[i] = make_chromosome(new_binary)
+            population[i] = make_chromosome(new_binary, config)
             
     if gen_count == 1:
         with open(output.filename, "a") as f:
