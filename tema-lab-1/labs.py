@@ -184,6 +184,64 @@ def mutation(population: list[chr], config: dict, gen_count: int) -> list[chr]:
             
     return population
 
+
+def mutation_updated(population: list[chr], config: dict, gen_count: int) -> list[chr]:
+    # aceeasi logica: prob < => e ales
+    mutation_prob = config['mutation_probability']
+    binary_len = chr.binary_length
+
+    if gen_count == 1:
+        with open(output.filename, "a") as f:
+            f.write(f"\nProbabilitatea de mutatie: {mutation_prob}\n")
+
+    mutated_indices = []
+
+    for i, chrom in enumerate(population):
+        u = rnd.random()
+        if u < mutation_prob:
+            mutated_indices.append(i)
+            # de unde se "rupe"
+            pos = rnd.randint(0, binary_len - 1)
+
+            bin_list = list(chrom.binary)
+            new_bits = []
+
+            if len(mutated_indices) == 1:
+                print(f"mutation cromo {i+1}, de la valoarea {pos}:")
+            for j in range(pos, binary_len):
+                val = int(bin_list[j])
+                if(len(mutated_indices) == 1):
+                    print(f"{int(bin_list[j])}")
+                if j > 0:
+                    val += int(bin_list[j-1])
+                    if len(mutated_indices) == 1:
+                        print(f"{int(bin_list[j-1])}")
+                if j < binary_len - 1:
+                    val += int(bin_list[j+1])
+                    if len(mutated_indices) == 1:
+                        print(f"{int(bin_list[j+1])}")
+                new_bits.append(str(val % 2))
+                if len(mutated_indices) == 1:
+                    print(f"suma lor e {val}, modificam in {str(val%2)}")
+
+
+            bin_list[pos:binary_len] = new_bits
+            new_binary = "".join(bin_list)
+            if len(mutated_indices) == 1:
+                print(f"noul cromo e {new_binary}")
+            population[i] = make_chromosome(new_binary, config)
+
+    if gen_count == 1:
+        with open(output.filename, "a") as f:
+            f.write("Au fost modificati cromozomii:\n")
+            for idx in mutated_indices:
+                f.write(f"{idx + 1}\n")
+
+    return population
+
+# la mutatie: in loc sa dau flip la bit, ma uit la maxim 3 valori (punctul de flip si vecinii ai)
+# suma celor de langa % 2 facute in paralel
+
 # -------------------------------------------------------------------
 # partea a doua de cod: get_max_fitness si get_mean_fitness
 

@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
 
             # mutation
-            new_population = labs.mutation(new_population, data, gen_count)
+            new_population = labs.mutation_updated(new_population, data, gen_count)
             total_fitness = labs.get_total_fitness(new_population)
             probabilities = labs.get_probabilities(new_population, total_fitness)
             with open("evolutie.txt", "a") as f:
@@ -103,3 +103,7 @@ if __name__ == '__main__':
 # plotarea graficului
 interval : float = 0.05
 interface.visualizer(data, generations, interval)
+
+
+# la mutatie: in loc sa dau flip la bit, ma uit la maxim 3 valori (punctul de flip si vecinii ai)
+# suma celor de langa % 2 facute in paralel
