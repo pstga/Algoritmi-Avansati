@@ -1,47 +1,55 @@
-def orientare(p, q, r):
-    return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
+def orientare(O, A, B):
+    return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0])
 
-def este_pe_segment(p, q, r):
-    return (min(p[0], q[0]) <= r[0] <= max(p[0], q[0]) and min(p[1], q[1]) <= r[1] <= max(p[1], q[1]))
 
-def check_point(poligon, n, pct):
-    p0 = poligon[0]
+def pe_segment(A, B, P):
+    if orientare(A, B, P) != 0:
+        return False
+    return (min(A[0], B[0]) <= P[0] <= max(A[0], B[0]) and
+            min(A[1], B[1]) <= P[1] <= max(A[1], B[1]))
 
-    # e in afara celui mai din stg unghi => out direct
-    if orientare(p0, poligon[1], pct) < 0 or orientare(p0, poligon[n - 1], pct) > 0:
+
+def check_position(poligon, punct):
+    n = len(poligon)
+    if n < 3:
         return "OUTSIDE"
-
-    # daca nu cumva e pe vreuna din laturile ultimului unghi
-    cp_prima = orientare(p0, poligon[1], pct)
-    if cp_prima == 0:
-        return "BOUNDARY" if este_pe_segment(p0, poligon[1], pct) else "OUTSIDE"
-
-    cp_ultima = orientare(p0, poligon[n - 1], pct)
-    if cp_ultima == 0:
-        return "BOUNDARY" if este_pe_segment(p0, poligon[n - 1], pct) else "OUTSIDE"
-
-    # incepem cautarea binara sa vedem in ce "triunghi" ma aflu :)
-    st = 1
-    dr = n - 2
-    idx = 1
-
-    while st <= dr:
-        m = (st + dr) // 2
-        if orientare(p0, poligon[m], pct) >= 0:
-            idx = m
-            st = m + 1
-        else:
-            dr = m - 1
-
-    # orientarea fata de latura gasita
-    rez = orientare(poligon[idx], poligon[idx + 1], pct)
-
-    if rez > 0:
-        return "INSIDE"
-    elif rez == 0:
+    if poligon[0][0] == punct[0] and poligon[0][1] == punct[1]:
         return "BOUNDARY"
-    else:
-        return "OUTSIDE"
+
+    st = 1
+    dr = n - 1
+    while st < dr:
+        mij = (st + dr + 1) // 2
+        if orientare(poligon[0], poligon[mij], punct) >= 0:
+            st = mij
+        else:
+            dr = mij - 1
+
+    urmator = (st + 1) % n
+
+    if (pe_segment(poligon[0], poligon[st], punct) or
+            pe_segment(poligon[st], poligon[urmator], punct) or
+            pe_segment(poligon[urmator], poligon[0], punct)):
+        return "BOUNDARY"
+
+    c1 = orientare(poligon[0], poligon[st], punct)
+    c2 = orientare(poligon[st], poligon[urmator], punct)
+    c3 = orientare(poligon[urmator], poligon[0], punct)
+
+    if c1 >= 0 and c2 >= 0 and c3 >= 0:
+        return "INSIDE"
+    return "OUTSIDE"
+
+
+def verificare_lenta(poligon, punct):
+    n = len(poligon)
+    for i in range(n):
+        urmator = (i + 1) % n
+        if pe_segment(poligon[i], poligon[urmator], punct):
+            return "BOUNDARY"
+        if orientare(poligon[i], poligon[urmator], punct) < 0:
+            return "OUTSIDE"
+    return "INSIDE"
 
 
 def solve():
@@ -52,8 +60,12 @@ def solve():
 
     m = int(input())
     for _ in range(m):
-        pct = list(map(int, input().split()))
-        print(check_point(poligon, n, pct))
+        interogare = list(map(int, input().split()))
+        if n <= 100:
+            print(verificare_lenta(poligon, interogare))
+        else:
+            print(check_position(poligon, interogare))
+
 
 if __name__ == "__main__":
     solve()
