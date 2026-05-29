@@ -40,7 +40,7 @@ def check_position(poligon, punct):
         return "INSIDE"
     return "OUTSIDE"
 
-
+'''
 def verificare_lenta(poligon, punct):
     n = len(poligon)
     for i in range(n):
@@ -50,7 +50,7 @@ def verificare_lenta(poligon, punct):
         if orientare(poligon[i], poligon[urmator], punct) < 0:
             return "OUTSIDE"
     return "INSIDE"
-
+'''
 
 def solve():
     n = int(input())
@@ -61,10 +61,7 @@ def solve():
     m = int(input())
     for _ in range(m):
         interogare = list(map(int, input().split()))
-        if n <= 100:
-            print(verificare_lenta(poligon, interogare))
-        else:
-            print(check_position(poligon, interogare))
+        print(check_position(poligon, interogare))
 
 
 if __name__ == "__main__":
